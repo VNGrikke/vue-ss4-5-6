@@ -18,6 +18,7 @@
               type="checkbox"
               v-model="job.completed"
               class="job-checkbox"
+              @click="changeCompleted(index)"
             />
             <label :class="{ completed: job.completed }">{{ job.title }}</label>
           </div>
@@ -36,29 +37,47 @@
 <script setup>
 import { ref, computed } from "vue";
 
-const jobs = ref([
-  { title: "Code", completed: false },
-  { title: "Homework", completed: false },
-  { title: "Learn English", completed: true },
-]);
+const jobs = ref(JSON.parse(localStorage.getItem("jobs")) || []);
 
 const newJobTitle = ref("");
 
 const addJob = () => {
   if (newJobTitle.value.trim() !== "") {
     const newJob = { title: newJobTitle.value, completed: false };
+    if (checkTitle(newJob.title)) {
+      return;
+    }
     jobs.value.push(newJob);
-    newJobTitle.value = ""; 
+    newJobTitle.value = "";
+    localStorage.setItem("jobs", JSON.stringify(jobs.value));
   }
+};
+
+const checkTitle = (title) => {
+  return jobs.value.some((job) => {
+    if (job.title.toLowerCase() === title.toLowerCase()) {
+      alert("Tên công việc đã tồn tại!");
+      return true;
+    }
+    return false;
+  });
 };
 
 const deleteJob = (index) => {
   jobs.value.splice(index, 1);
+  localStorage.setItem("jobs", JSON.stringify(jobs.value));
 };
 
 const completedJobs = computed(
   () => jobs.value.filter((job) => job.completed).length
 );
+
+const changeCompleted = (index) => {
+  console.log(index);
+  jobs.value[index].completed = !jobs.value[index].completed;
+
+  localStorage.setItem("jobs", JSON.stringify(jobs.value));
+};
 </script>
 
 <style>
